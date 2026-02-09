@@ -3,7 +3,8 @@ import { LogbookTable } from './components/LogbookTable';
 import { LogbookForm } from './components/LogbookForm';
 import { Plus, FileDown, RefreshCw } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
-
+import Swal from 'sweetalert2';
+import { LogbookDetailDialog } from './components/LogbookDetail';
 export interface LogbookEntry {
   no: number;
   tanggal: string;
@@ -21,6 +22,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export default function App() {
   const [entries, setEntries] = useState<LogbookEntry[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<LogbookEntry | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -88,7 +90,11 @@ export default function App() {
       toast.error('Gagal menambahkan entry');
     }
   };
-
+  /* ================= Detail ================= */
+  const handleDetailEntry = (entry: LogbookEntry): void => {
+    setEditingEntry(entry);
+    setIsDetailOpen(true);
+  };
   /* ================= UPDATE ================= */
   const handleEditEntry = async (
     entry: Omit<LogbookEntry, 'no'>,
