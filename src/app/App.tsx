@@ -3,6 +3,7 @@ import { LogbookTable } from './components/LogbookTable';
 import { LogbookForm } from './components/LogbookForm';
 import { Plus, FileDown, RefreshCw } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
+import Swal from 'sweetalert2';
 
 export interface LogbookEntry {
   no: number;
@@ -123,8 +124,6 @@ export default function App() {
 
   /* ================= DELETE ================= */
   const handleDeleteEntry = async (no: number): Promise<void> => {
-    if (toast.info('Anda yakin ingin menghapus entry ini?')) return;
-
     try {
       const response = await fetch(`${API_BASE_URL}/logbook/delete/${no}`, {
         method: 'DELETE',
