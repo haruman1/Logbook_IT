@@ -16,7 +16,7 @@ export interface LogbookEntry {
   pic: string;
 }
 
-const API_BASE_URL = 'https://api-logbook.haruman.web.id';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function App() {
   const [entries, setEntries] = useState<LogbookEntry[]>([]);
@@ -37,7 +37,6 @@ export default function App() {
         throw new Error(result.message || 'Gagal memuat data');
       }
 
-      
       const safeData: LogbookEntry[] = (result.data ?? []).map((item: any) => ({
         no: item.no ?? 0,
         tanggal: item.tanggal ?? '',
@@ -66,13 +65,13 @@ export default function App() {
 
   /* ================= CREATE  ================= */
   const handleAddEntry = async (
-    entry: Omit<LogbookEntry, 'no'>
+    entry: Omit<LogbookEntry, 'no'>,
   ): Promise<void> => {
     try {
       const response = await fetch(`${API_BASE_URL}/logbook/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(entry), 
+        body: JSON.stringify(entry),
       });
 
       const result = await response.json();
@@ -92,7 +91,7 @@ export default function App() {
 
   /* ================= UPDATE ================= */
   const handleEditEntry = async (
-    entry: Omit<LogbookEntry, 'no'>
+    entry: Omit<LogbookEntry, 'no'>,
   ): Promise<void> => {
     if (!editingEntry) return;
 
@@ -103,7 +102,7 @@ export default function App() {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(entry),
-        }
+        },
       );
 
       const result = await response.json();
@@ -124,13 +123,12 @@ export default function App() {
 
   /* ================= DELETE ================= */
   const handleDeleteEntry = async (no: number): Promise<void> => {
-    if (!confirm('Apakah Anda yakin ingin menghapus entry ini?')) return;
+    if (toast.info('Anda yakin ingin menghapus entry ini?')) return;
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/logbook/delete/${no}`,
-        { method: 'DELETE' }
-      );
+      const response = await fetch(`${API_BASE_URL}/logbook/delete/${no}`, {
+        method: 'DELETE',
+      });
 
       const result = await response.json();
 
@@ -160,7 +158,7 @@ export default function App() {
       'PIC',
     ];
 
-    const csvRows = filteredEntries.map(e => [
+    const csvRows = filteredEntries.map((e) => [
       e.no,
       e.tanggal,
       e.modul_fitur,
@@ -174,7 +172,7 @@ export default function App() {
 
     const csvContent = [
       headers.join(','),
-      ...csvRows.map(r => r.map(c => `"${c}"`).join(',')),
+      ...csvRows.map((r) => r.map((c) => `"${c}"`).join(',')),
     ].join('\n');
 
     const blob = new Blob([csvContent], {
@@ -190,7 +188,7 @@ export default function App() {
   };
 
   /* ================= FILTER ================= */
-  const filteredEntries = entries.filter(entry => {
+  const filteredEntries = entries.filter((entry) => {
     const search = searchTerm.toLowerCase();
     const matchesSearch =
       entry.modul_fitur.toLowerCase().includes(search) ||
@@ -205,7 +203,7 @@ export default function App() {
   });
 
   const uniqueStatuses = Array.from(
-    new Set(entries.map(e => e.status))
+    new Set(entries.map((e) => e.status)),
   ).filter(Boolean);
 
   /* ================= FORM HANDLER ================= */
@@ -230,16 +228,14 @@ export default function App() {
       <Toaster position="top-right" richColors />
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-[1600px] mx-auto">
-
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Logbook TIM IT 
+              Logbook TIM IT
             </h1>
             <p className="text-gray-600">
               Dokumentasi aktivitas dan progress project
             </p>
-
           </div>
 
           {/* Actions Bar */}
@@ -255,13 +251,13 @@ export default function App() {
                 />
 
                 <select
-                  title='Filter'
+                  title="Filter"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                   className="px-4 py-2 border border-gray-300 rounded-lg"
                 >
                   <option value="all">Semua Status</option>
-                  {uniqueStatuses.map(status => (
+                  {uniqueStatuses.map((status) => (
                     <option key={status} value={status}>
                       {status}
                     </option>
