@@ -97,27 +97,56 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
                     <td className="px-4 py-3 text-sm">{entry.pic}</td>
                     <td className="px-4 py-3 text-sm">
                       <div className="flex justify-center gap-2">
-                        <button
-                          onClick={() => handleViewDetail(entry)}
-                          className="p-1 hover:bg-blue-50 rounded"
-                          title="Lihat Detail"
-                        >
-                          <Eye className="w-4 h-4 text-blue-600" />
-                        </button>
-                        <button
-                          onClick={() => onEdit(entry)}
-                          className="p-1 hover:bg-yellow-50 rounded"
-                          title="Edit"
-                        >
-                          <Edit className="w-4 h-4 text-yellow-600" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(entry.no)}
-                          className="p-1 hover:bg-red-50 rounded"
-                          title="Hapus"
-                        >
-                          <Trash2 className="w-4 h-4 text-red-600" />
-                        </button>
+                        {/* View */}
+                        <div className="relative group">
+                          <button
+                            onClick={() => handleViewDetail(entry)}
+                            className="p-1 hover:bg-blue-50 rounded"
+                          >
+                            <Eye className="w-4 h-4 text-blue-600" />
+                          </button>
+                          <span
+                            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1
+      whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-xs text-white
+      opacity-0 group-hover:opacity-100 transition pointer-events-none"
+                          >
+                            Lihat Detail
+                          </span>
+                        </div>
+
+                        {/* Edit */}
+                        <div className="relative group">
+                          <button
+                            onClick={() => onEdit(entry)}
+                            className="p-1 hover:bg-yellow-50 rounded"
+                          >
+                            <Edit className="w-4 h-4 text-yellow-600" />
+                          </button>
+                          <span
+                            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1
+      whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-xs text-white
+      opacity-0 group-hover:opacity-100 transition pointer-events-none"
+                          >
+                            Edit Data
+                          </span>
+                        </div>
+
+                        {/* Delete */}
+                        <div className="relative group">
+                          <button
+                            onClick={() => handleDelete(entry.no)}
+                            className="p-1 hover:bg-red-50 rounded"
+                          >
+                            <Trash2 className="w-4 h-4 text-red-600" />
+                          </button>
+                          <span
+                            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1
+      whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-xs text-white
+      opacity-0 group-hover:opacity-100 transition pointer-events-none"
+                          >
+                            Hapus Data
+                          </span>
+                        </div>
                       </div>
                     </td>
                   </tr>
