@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 import { LogbookDetailDialog } from './components/LogbookDetail';
 export interface LogbookEntry {
   no: number;
-  tanggal: string;
+  tanggal: Date | string;
   modul_fitur: string;
   aktivitas: string;
   detail_teknis: string;
@@ -41,7 +41,7 @@ export default function App() {
 
       const safeData: LogbookEntry[] = (result.data ?? []).map((item: any) => ({
         no: item.no ?? 0,
-        tanggal: item.tanggal ?? '',
+        tanggal: item.tanggal ? new Date(item.tanggal) : new Date(),
         modul_fitur: item.modul_fitur ?? '',
         aktivitas: item.aktivitas ?? '',
         detail_teknis: item.detail_teknis ?? '',
@@ -115,10 +115,11 @@ export default function App() {
 
       if (!response.ok) {
         // throw new Error(result.message);
-        toast.error(result);
+        toast.error(result.message);
       }
 
-      toast.success('Entry berhasil diupdate');
+      toast.success(result.message);
+      console.log(result);
       await fetchLogbookEntries();
       setEditingEntry(null);
       setIsFormOpen(false);

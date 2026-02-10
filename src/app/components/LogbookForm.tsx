@@ -26,7 +26,10 @@ const getLocalDate = (): string => {
 
 export function LogbookForm({ entry, onSubmit, onClose }: LogbookFormProps) {
   const [formData, setFormData] = useState({
-    tanggal: entry?.tanggal || getLocalDate(), // ✅ Fix: gunakan getLocalDate() atau entry.tanggal
+    tanggal:
+      entry?.tanggal instanceof Date
+        ? entry.tanggal.toISOString().slice(0, 10)
+        : entry?.tanggal || getLocalDate(),
     modul_fitur: entry?.modul_fitur || '',
     aktivitas: entry?.aktivitas || '',
     detail_teknis: entry?.detail_teknis || '',
