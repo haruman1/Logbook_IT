@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Eye, Edit, Trash2 } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Eye, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { LogbookEntry } from '../App';
 import { LogbookDetailDialog } from './LogbookDetail';
-
+import Swal from 'sweetalert2';
 interface LogbookTableProps {
   entries: LogbookEntry[];
   onEdit: (entry: LogbookEntry) => void;
@@ -13,16 +13,102 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
   const [detailEntry, setDetailEntry] = useState<LogbookEntry | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5); // Bisa diubah sesuai kebutuhan
+
+  // Sort entries by date (newest first)
+  const sortedEntries = useMemo(() => {
+    return [...entries].sort((a, b) => {
+      const dateA = new Date(a.tanggal).getTime();
+      const dateB = new Date(b.tanggal).getTime();
+      return dateB - dateA; // Descending order (terbaru dulu)
+    });
+  }, [entries]);
+
   const handleViewDetail = (entry: LogbookEntry) => {
     setDetailEntry(entry);
     setIsDetailOpen(true);
   };
 
   const handleDelete = (no: number) => {
-    if (window.confirm('Yakin ingin menghapus entry ini?')) {
-      onDelete(no);
+    Swal.fire({
+      title: 'Yakin ingin menghapus entry ini?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus',
+      cancelButtonText: 'Batal',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        onDelete(no);
+      }
+    });
+  };
+
+  // Pagination calculations
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentEntries = sortedEntries.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(sortedEntries.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
     }
   };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxPagesToShow = 5;
+
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pageNumbers.push(i);
+        }
+      } else {
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      }
+    }
+
+    return pageNumbers;
+  };
+
+  // Reset to page 1 when entries change
+  useState(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  });
 
   return (
     <>
@@ -55,7 +141,7 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {entries.length === 0 ? (
+              {currentEntries.length === 0 ? (
                 <tr>
                   <td
                     colSpan={7}
@@ -65,7 +151,7 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
                   </td>
                 </tr>
               ) : (
-                entries.map((entry) => (
+                currentEntries.map((entry) => (
                   <tr key={entry.no} className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm">{entry.no}</td>
                     <td className="px-4 py-3 text-sm">
@@ -155,6 +241,78 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {sortedEntries.length > 0 && (
+          <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
+            <div className="flex items-center justify-between">
+              {/* Info */}
+              <div className="text-sm text-gray-700">
+                Menampilkan{' '}
+                <span className="font-medium">{indexOfFirstItem + 1}</span>{' '}
+                sampai{' '}
+                <span className="font-medium">
+                  {Math.min(indexOfLastItem, sortedEntries.length)}
+                </span>{' '}
+                dari <span className="font-medium">{sortedEntries.length}</span>{' '}
+                data
+              </div>
+
+              {/* Pagination Controls */}
+              <div className="flex items-center gap-2">
+                {/* Previous Button */}
+                <button
+                  onClick={handlePrevious}
+                  disabled={currentPage === 1}
+                  className={`p-2 rounded-md ${
+                    currentPage === 1
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+
+                {/* Page Numbers */}
+                <div className="flex gap-1">
+                  {getPageNumbers().map((pageNum, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        if (typeof pageNum === 'number') {
+                          handlePageChange(pageNum);
+                        }
+                      }}
+                      disabled={pageNum === '...'}
+                      className={`px-3 py-1 rounded-md text-sm ${
+                        pageNum === currentPage
+                          ? 'bg-blue-600 text-white font-medium'
+                          : pageNum === '...'
+                            ? 'text-gray-400 cursor-default'
+                            : 'text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Next Button */}
+                <button
+                  onClick={handleNext}
+                  disabled={currentPage === totalPages}
+                  className={`p-2 rounded-md ${
+                    currentPage === totalPages
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Detail Dialog */}

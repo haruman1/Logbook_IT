@@ -16,6 +16,7 @@ export interface LogbookEntry {
   status: string;
   pic: string;
 }
+type Rows = LogbookEntry[];
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -27,12 +28,17 @@ export default function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(false);
-
+  const [rows, setRows] = useState<Rows>([]);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalRows, setTotalRows] = useState(0);
   /* ================= FETCH LIST ================= */
   const fetchLogbookEntries = async (): Promise<void> => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/logbook/list`);
+      const response = await fetch(
+        `${API_BASE_URL}/logbook/list?page=${page}&limit=${limit}&search=${searchTerm}&status=${statusFilter}`,
+      );
       const result = await response.json();
 
       if (!response.ok) {
