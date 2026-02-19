@@ -30,7 +30,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [rows, setRows] = useState<Rows>([]);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(99999);
   const [totalRows, setTotalRows] = useState(0);
   /* ================= FETCH LIST ================= */
   const fetchLogbookEntries = async (): Promise<void> => {
